@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 // 카카오맵 API 키와 매장 정보
 const KAKAO_API_KEY = process.env.NEXT_PUBLIC_KAKAO_API_KEY || "6256a21ea991a5f2d305bc6fc8655fa5"
 const STORE_ADDRESS = "충남 홍성군 홍북읍 청사로174번길 25 2층"
-const STORE_NAME = "스시마츠 홍성본점"
+const STORE_NAME = "스시마츠 홍성점"
 
 // 카카오맵 타입 선언
 declare global {
@@ -26,12 +26,31 @@ declare global {
             ) => void;
           };
         };
-        LatLng: new (lat: string, lng: string) => any;
-        Map: new (container: HTMLElement, options: { center: any; level: number }) => any;
-        Marker: new (options: { position: any }) => { setMap: (map: any) => void };
-        InfoWindow: new (options: { content: string }) => { open: (map: any, marker: any) => void };
+        LatLng: new (lat: string, lng: string) => KakaoLatLng;
+        Map: new (container: HTMLElement, options: { center: KakaoLatLng; level: number }) => KakaoMap;
+        Marker: new (options: { position: KakaoLatLng }) => KakaoMarker;
+        InfoWindow: new (options: { content: string }) => KakaoInfoWindow;
       };
     };
+  }
+
+  // 카카오맵 타입 정의
+  interface KakaoLatLng {
+    getLat(): number;
+    getLng(): number;
+  }
+
+  interface KakaoMap {
+    setCenter(position: KakaoLatLng): void;
+    relayout(): void;
+  }
+
+  interface KakaoMarker {
+    setMap(map: KakaoMap): void;
+  }
+
+  interface KakaoInfoWindow {
+    open(map: KakaoMap, marker: KakaoMarker): void;
   }
 }
 
