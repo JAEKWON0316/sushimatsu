@@ -59,7 +59,10 @@ export default function StoresSection() {
   const [showMap, setShowMap] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
   const [isMapLoading, setIsMapLoading] = useState(false)
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false)
   const mapInstance = useRef<KakaoMap | null>(null)
+  const retryCount = useRef(0)
+  const MAX_RETRY = 15
 
   // 지도 표시/숨김 토글
   const toggleMap = () => {
@@ -68,6 +71,7 @@ export default function StoresSection() {
     // 지도를 보여줄 때 오류 메시지 초기화
     if (!showMap) {
       setMapError(null)
+      retryCount.current = 0
     }
   }
 
@@ -153,6 +157,8 @@ export default function StoresSection() {
 
   // 카카오맵 API 스크립트 로드
   useEffect(() => {
+    if (isScriptLoaded) return
+    
     // 미리 스크립트 로드 (페이지 로드 시)
     if (!document.getElementById('kakao-map-script')) {
       try {
@@ -164,18 +170,29 @@ export default function StoresSection() {
         script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services`
         script.async = true
         
+        // 로드 완료 이벤트
+        script.onload = () => {
+          console.log("카카오맵 스크립트 로드 완료")
+          setIsScriptLoaded(true)
+        }
+        
         // 오류 처리
         script.onerror = (error) => {
           console.error("카카오맵 스크립트 로드 오류:", error)
+          setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
         }
         
         // body에 스크립트 추가
         document.body.appendChild(script)
       } catch (error) {
         console.error("스크립트 추가 중 오류 발생:", error)
+        setMapError('카카오맵 스크립트를 추가하는 과정에서 오류가 발생했습니다.')
       }
+    } else {
+      // 이미 스크립트가 있으면 로드된 것으로 간주
+      setIsScriptLoaded(true)
     }
-  }, [])
+  }, [isScriptLoaded])
   
   // 지도 컨테이너 표시 시 지도 초기화
   useEffect(() => {
@@ -183,18 +200,50 @@ export default function StoresSection() {
     if (showMap && mapContainer.current) {
       // 카카오맵 로드 확인 함수
       const checkKakaoMapLoaded = () => {
+        // 최대 재시도 횟수를 초과하면 오류 메시지 표시
+        if (retryCount.current >= MAX_RETRY) {
+          console.error("카카오맵 로드 재시도 횟수 초과")
+          setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
+          setIsMapLoading(false)
+          return
+        }
+        
         if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
+          console.log("카카오맵 객체 확인됨, 지도 초기화 시작")
           initializeMap()
         } else {
           // 로드되지 않았으면 잠시 후 다시 시도
-          console.log("카카오맵이 아직 로드되지 않음, 재시도...")
-          setTimeout(checkKakaoMapLoaded, 100)
+          retryCount.current += 1
+          console.log(`카카오맵이 아직 로드되지 않음, 재시도... (${retryCount.current}/${MAX_RETRY})`)
+          setTimeout(checkKakaoMapLoaded, 300)
         }
       }
       
-      checkKakaoMapLoaded()
+      if (isScriptLoaded) {
+        checkKakaoMapLoaded()
+      } else {
+        // 스크립트가 로드되면 지도 초기화
+        const scriptLoadCheck = setInterval(() => {
+          if (isScriptLoaded) {
+            clearInterval(scriptLoadCheck)
+            checkKakaoMapLoaded()
+          }
+          
+          // 일정 시간이 지나도 스크립트가 로드되지 않으면 오류 메시지 표시
+          retryCount.current += 1
+          if (retryCount.current >= MAX_RETRY) {
+            clearInterval(scriptLoadCheck)
+            console.error("카카오맵 스크립트 로드 시간 초과")
+            setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
+            setIsMapLoading(false)
+          }
+        }, 300)
+        
+        // 컴포넌트가 언마운트되면 인터벌 정리
+        return () => clearInterval(scriptLoadCheck)
+      }
     }
-  }, [showMap])
+  }, [showMap, isScriptLoaded])
 
   return (
     <section id="stores" className="py-20 bg-black">
