@@ -59,7 +59,7 @@ export default function StoresSection() {
   const [showMap, setShowMap] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
   const [isMapLoading, setIsMapLoading] = useState(false)
-  const mapInstance = useRef<any>(null)
+  const mapInstance = useRef<KakaoMap | null>(null)
 
   // 지도 표시/숨김 토글
   const toggleMap = () => {
