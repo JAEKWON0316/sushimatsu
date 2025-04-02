@@ -5,7 +5,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self' *.kakao.com *.daumcdn.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.kakao.com *.daumcdn.net *.youtube.com; connect-src 'self' *.kakao.com *.daumcdn.net *.youtube.com https://dapi.kakao.com; img-src 'self' data: blob: *.kakao.com *.daumcdn.net *.youtube.com img.youtube.com; style-src 'self' 'unsafe-inline' *.kakao.com *.daumcdn.net; frame-src 'self' *.kakao.com *.daumcdn.net www.youtube.com youtube.com;"
+          "value": "default-src 'self' *.kakao.com *.daumcdn.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' dapi.kakao.com *.kakao.com *.daumcdn.net *.youtube.com; connect-src 'self' dapi.kakao.com *.kakao.com *.daumcdn.net *.youtube.com https://dapi.kakao.com; img-src 'self' data: blob: *.kakao.com *.daumcdn.net *.youtube.com img.youtube.com; style-src 'self' 'unsafe-inline' *.kakao.com *.daumcdn.net; frame-src 'self' *.kakao.com *.daumcdn.net www.youtube.com youtube.com;"
         },
         {
           "key": "Access-Control-Allow-Origin",
@@ -20,6 +20,31 @@
           "value": "X-Requested-With, Content-Type, Accept"
         }
       ]
+    },
+    {
+      "source": "/v2/maps/sdk.js",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "*"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "X-Requested-With, Content-Type, Accept"
+        },
+        {
+          "key": "Content-Type", 
+          "value": "application/javascript; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400"
+        }
+      ]
     }
   ],
   "rewrites": [
@@ -30,6 +55,14 @@
     {
       "source": "/v2/maps/sdk.js",
       "destination": "https://dapi.kakao.com/v2/maps/sdk.js"
+    },
+    {
+      "source": "/v2/maps/:path*",
+      "destination": "https://dapi.kakao.com/v2/maps/:path*"
+    },
+    {
+      "source": "/v2/:path*",
+      "destination": "https://dapi.kakao.com/v2/:path*"
     }
   ]
 } 

@@ -77,25 +77,52 @@ export default function StoresSection() {
       const existingScript = document.getElementById('kakao-map-script')
       if (!existingScript) {
         try {
-          const script = document.createElement('script')
-          script.id = 'kakao-map-script'
-          script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false`
-          script.crossOrigin = "anonymous"
-          script.async = true
-          script.defer = true
-          
-          // 더 자세한 에러 핸들링
-          script.onload = () => {
-            console.log("카카오맵 스크립트가 성공적으로 로드되었습니다.");
-            setIsMapScriptLoaded(true)
+          // 카카오에서 제안하는 공식 방식으로 스크립트 로드
+          window.kakao = window.kakao || {};
+          window.kakao.maps = window.kakao.maps || {};
+
+          // 이미 로드된 경우 바로 콜백 실행
+          if (typeof window.kakao.maps.load === 'function') {
+            console.log("카카오맵 이미 로드됨");
+            setIsMapScriptLoaded(true);
+            return;
           }
+
+          console.log("카카오맵 스크립트 로드 시작...");
+          
+          const script = document.createElement('script');
+          script.id = 'kakao-map-script';
+          // 원래 URL 사용 - vercel.json의 리라이트 규칙이 이를 프록시
+          script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false`;
+          script.async = true;
+          
+          script.onload = () => {
+            console.log("카카오맵 스크립트 로드 완료");
+            setIsMapScriptLoaded(true);
+          };
           
           script.onerror = (error) => {
             console.error("카카오맵 스크립트 로드 오류:", error);
-            setMapError('카카오맵 스크립트 로드에 실패했습니다. 네트워크 연결을 확인해주세요.')
-          }
+            // 직접 호출 실패시 프록시 시도
+            const proxyScript = document.createElement('script');
+            proxyScript.id = 'kakao-map-proxy-script';
+            proxyScript.src = `/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false`;
+            proxyScript.async = true;
+            
+            proxyScript.onload = () => {
+              console.log("프록시 카카오맵 스크립트 로드 성공");
+              setIsMapScriptLoaded(true);
+            };
+            
+            proxyScript.onerror = () => {
+              console.error("모든 카카오맵 로드 시도 실패");
+              setMapError('카카오맵을 불러올 수 없습니다. 페이지를 새로고침하거나 나중에 다시 시도해주세요.');
+            };
+            
+            document.body.appendChild(proxyScript);
+          };
           
-          document.head.appendChild(script)
+          document.body.appendChild(script);
         } catch (error) {
           console.error("스크립트 추가 중 오류 발생:", error);
           setMapError('카카오맵 스크립트를 추가하는 과정에서 오류가 발생했습니다.')
