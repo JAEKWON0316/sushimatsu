@@ -16,68 +16,76 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-black text-white py-2 px-4 sticky top-0 z-50 border-b border-gray-800">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <div className="flex items-center">
+    <header className="bg-black text-white py-1 sticky top-0 z-50 border-b border-gray-800">
+      <div className="max-w-full w-full px-6 flex justify-between items-center">
+        {/* 로고 - 왼쪽 배치 */}
+        <div className="flex items-center pl-4">
           <Image
-            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%EC%A0%9C%EB%AA%A9%20%EC%97%86%EB%8A%94%20%EB%94%94%EC%9E%90%EC%9D%B8%20-%202025-03-13T184043.543-SyYlPpWdu8hQFJzWH3e6rdxGT8pdSw.png"
+            src="/logo004.png"
             alt="스시마츠 로고"
-            width={240}
-            height={160}
-            className="h-28 w-auto"
+            width={400}
+            height={400}
+            className="h-24 w-auto"
             priority
           />
         </div>
 
-        <nav className="hidden lg:flex space-x-8">
+        {/* 네비게이션 - 가운데 배치 */}
+        <nav className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 space-x-10">
           <button
             onClick={() => scrollToSection('home')}
-            className="text-lg hover:text-yellow-400 transition-colors"
+            className="text-base font-medium hover:text-yellow-400 transition-colors whitespace-nowrap"
           >
             Home
           </button>
           <button
             onClick={() => scrollToSection('about')}
-            className="text-lg hover:text-yellow-400 transition-colors"
+            className="text-base font-medium hover:text-yellow-400 transition-colors whitespace-nowrap"
           >
             브랜드소개
           </button>
           <button
             onClick={() => scrollToSection('menu')}
-            className="text-lg hover:text-yellow-400 transition-colors"
+            className="text-base font-medium hover:text-yellow-400 transition-colors whitespace-nowrap"
           >
             메뉴소개
           </button>
           <button
             onClick={() => scrollToSection('stores')}
-            className="text-lg hover:text-yellow-400 transition-colors"
+            className="text-base font-medium hover:text-yellow-400 transition-colors whitespace-nowrap"
           >
             매장안내
           </button>
           <button
             onClick={() => scrollToSection('franchise')}
-            className="text-lg hover:text-yellow-400 transition-colors"
+            className="text-base font-medium hover:text-yellow-400 transition-colors whitespace-nowrap"
           >
             가맹문의
           </button>
         </nav>
 
-        <div className="hidden lg:block text-yellow-400 font-bold text-xl">가맹문의 0507-1380-5336</div>
+        {/* 연락처 - 오른쪽 배치 */}
+        <div className="hidden lg:block pr-4">
+          <div className="text-yellow-400 font-bold text-lg whitespace-nowrap">가맹문의 0507-1380-5336</div>
+        </div>
 
-        <button 
-          className="lg:hidden text-white"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-8 w-8"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        {/* 모바일 메뉴 버튼 */}
+        <div className="lg:hidden">
+          <button 
+            className="text-white"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-8 w-8"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* 모바일 메뉴 */}
@@ -120,4 +128,4 @@ export default function Header() {
       )}
     </header>
   )
-} 
+}

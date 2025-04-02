@@ -15,6 +15,9 @@ import FaqSection from "@/components/home/FaqSection"
 import FeatureSection from "@/components/home/FeatureSection"
 import StatsSection from "@/components/home/StatsSection"
 import VideoSection from "@/components/home/VideoSection"
+import ProfitAnalysisSection from "@/components/home/ProfitAnalysisSection"
+import StrengthSection from "@/components/home/StrengthSection"
+import SupportSection from "@/components/home/SupportSection"
 
 export default function Home() {
   return (
@@ -25,12 +28,15 @@ export default function Home() {
       <main>
         <HeroSection />
         <SloganSection />
+        <StrengthSection />
         <ProfileSection />
+        <ProfitAnalysisSection />
         <TestimonialSection />
         <StatsSection />
         <FeatureSection />
         <AboutSection />
         <MenuSection />
+        <SupportSection />
         <VideoSection />
         <StoresSection />
         <FaqSection />

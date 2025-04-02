@@ -14,7 +14,32 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'dapi.kakao.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.daumcdn.net',
+        port: '',
+        pathname: '/**',
+      },
     ],
+  },
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.kakao.com *.daumcdn.net; connect-src 'self' *.kakao.com *.daumcdn.net; img-src 'self' data: blob: *.kakao.com *.daumcdn.net; style-src 'self' 'unsafe-inline' *.kakao.com *.daumcdn.net; frame-src 'self' *.kakao.com *.daumcdn.net;"
+          }
+        ],
+      },
+    ];
   },
 }
 
