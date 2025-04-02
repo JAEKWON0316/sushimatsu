@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import { Button } from "@/components/ui/button"
 import Script from "next/script"
 
 // 카카오맵 API 키와 매장 정보
@@ -57,9 +56,8 @@ declare global {
 
 export default function StoresSection() {
   const mapContainer = useRef<HTMLDivElement>(null)
-  const [showMap, setShowMap] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
-  const [isMapLoading, setIsMapLoading] = useState(false)
+  const [isMapLoading, setIsMapLoading] = useState(true)
   const mapInstance = useRef<KakaoMap | null>(null)
   const [isScriptLoaded, setIsScriptLoaded] = useState(false)
 
@@ -68,20 +66,7 @@ export default function StoresSection() {
     return !!window.kakao && !!window.kakao.maps && !!window.kakao.maps.services;
   }
 
-  // 지도 표시/숨김 토글
-  const toggleMap = () => {
-    setShowMap((prev) => !prev)
-    
-    // 지도를 보여줄 때 오류 메시지 초기화 및 로딩 설정
-    if (!showMap) {
-      setMapError(null)
-      if (!mapInstance.current) {
-        setIsMapLoading(true)
-      }
-    }
-  }
-
-  // 지도 초기화 함수 (useCallback으로 감싸서 의존성 배열 문제 해결)
+  // 지도 초기화 함수
   const initializeMap = useCallback(() => {
     if (!mapContainer.current) return;
     
@@ -164,15 +149,14 @@ export default function StoresSection() {
     console.log("카카오맵 SDK 로드 완료")
     setIsScriptLoaded(true)
     
-    // 지도가 표시되어 있다면 초기화 시작
-    if (showMap && !mapInstance.current) {
+    if (!mapInstance.current) {
       initializeMap()
     }
   }
 
-  // 지도 초기화 시도
+  // 스크립트 로드 후 지도 초기화
   useEffect(() => {
-    if (showMap && isScriptLoaded && !mapInstance.current) {
+    if (isScriptLoaded && !mapInstance.current) {
       if (checkKakaoMapLoaded()) {
         console.log("카카오맵 SDK 로드 확인됨, 지도 초기화 시작")
         initializeMap()
@@ -203,7 +187,7 @@ export default function StoresSection() {
         }
       }
     }
-  }, [showMap, isScriptLoaded, initializeMap])
+  }, [isScriptLoaded, initializeMap])
 
   return (
     <>
@@ -215,6 +199,7 @@ export default function StoresSection() {
         onError={() => {
           console.error("카카오맵 스크립트 로드 오류")
           setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
+          setIsMapLoading(false)
         }}
       />
       
@@ -233,37 +218,27 @@ export default function StoresSection() {
               <p className="mb-4">
                 <strong>영업시간:</strong> 11:00 - 21:00
               </p>
-              <div className="mt-6">
-                <Button 
-                  className="bg-yellow-400 hover:bg-yellow-500 text-black mb-6"
-                  onClick={toggleMap}
-                >
-                  {showMap ? '지도 닫기' : '지도 보기'}
-                </Button>
-                
-                {/* 에러 메시지 표시 */}
-                {mapError && showMap && (
-                  <div className="text-red-400 mb-4 p-2 bg-gray-800 rounded">
-                    {mapError}
-                  </div>
-                )}
-                
-                {/* 지도 로딩 메시지 */}
-                {showMap && !mapError && isMapLoading && (
-                  <div className="text-yellow-400 mb-4 p-2 bg-gray-800 rounded">
-                    지도를 불러오는 중입니다...
-                  </div>
-                )}
-                
-                {/* 지도 컨테이너 */}
-                {showMap && (
-                  <div 
-                    id="map" 
-                    ref={mapContainer} 
-                    className="w-full h-[400px] rounded-lg mt-4 overflow-hidden transition-all duration-300 bg-gray-800"
-                  ></div>
-                )}
-              </div>
+              
+              {/* 에러 메시지 표시 */}
+              {mapError && (
+                <div className="text-red-400 mb-4 p-2 bg-gray-800 rounded">
+                  {mapError}
+                </div>
+              )}
+              
+              {/* 지도 로딩 메시지 */}
+              {isMapLoading && !mapError && (
+                <div className="text-yellow-400 mb-4 p-2 bg-gray-800 rounded">
+                  지도를 불러오는 중입니다...
+                </div>
+              )}
+              
+              {/* 지도 컨테이너 */}
+              <div 
+                id="map" 
+                ref={mapContainer} 
+                className="w-full h-[400px] rounded-lg mt-6 overflow-hidden transition-all duration-300 bg-gray-800"
+              ></div>
             </div>
           </div>
         </div>
