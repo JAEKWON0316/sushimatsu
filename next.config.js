@@ -26,6 +26,18 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: '*.youtube.com',
+        port: '',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.youtube.com',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   async headers() {
@@ -35,7 +47,7 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.kakao.com *.daumcdn.net; connect-src 'self' *.kakao.com *.daumcdn.net; img-src 'self' data: blob: *.kakao.com *.daumcdn.net; style-src 'self' 'unsafe-inline' *.kakao.com *.daumcdn.net; frame-src 'self' *.kakao.com *.daumcdn.net;"
+            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.kakao.com *.daumcdn.net *.youtube.com; connect-src 'self' *.kakao.com *.daumcdn.net *.youtube.com; img-src 'self' data: blob: *.kakao.com *.daumcdn.net *.youtube.com img.youtube.com; style-src 'self' 'unsafe-inline' *.kakao.com *.daumcdn.net; frame-src 'self' *.kakao.com *.daumcdn.net www.youtube.com youtube.com;"
           }
         ],
       },
