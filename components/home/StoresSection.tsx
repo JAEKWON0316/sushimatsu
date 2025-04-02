@@ -18,7 +18,7 @@ declare global {
         Marker: new (options: { position: KakaoLatLng }) => KakaoMarker;
         InfoWindow: new (options: { content: string }) => KakaoInfoWindow;
         event: {
-          addListener: (target: any, type: string, callback: () => void) => void;
+          addListener: <T>(target: T, type: string, callback: () => void) => void;
         };
         services: {
           Status: { OK: string };
