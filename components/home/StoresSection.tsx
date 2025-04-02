@@ -76,16 +76,31 @@ export default function StoresSection() {
       // 스크립트가 이미 있는지 확인
       const existingScript = document.getElementById('kakao-map-script')
       if (!existingScript) {
-        const script = document.createElement('script')
-        script.id = 'kakao-map-script'
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false`
-        script.onload = () => {
-          setIsMapScriptLoaded(true)
+        try {
+          const script = document.createElement('script')
+          script.id = 'kakao-map-script'
+          // Vercel 프록시를 통해 요청하기 위해 상대 경로 사용
+          script.src = `/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false`
+          script.crossOrigin = "anonymous"
+          script.async = true
+          script.defer = true
+          
+          // 더 자세한 에러 핸들링
+          script.onload = () => {
+            console.log("카카오맵 스크립트가 성공적으로 로드되었습니다.");
+            setIsMapScriptLoaded(true)
+          }
+          
+          script.onerror = (error) => {
+            console.error("카카오맵 스크립트 로드 오류:", error);
+            setMapError('카카오맵 스크립트 로드에 실패했습니다. 네트워크 연결을 확인해주세요.')
+          }
+          
+          document.head.appendChild(script)
+        } catch (error) {
+          console.error("스크립트 추가 중 오류 발생:", error);
+          setMapError('카카오맵 스크립트를 추가하는 과정에서 오류가 발생했습니다.')
         }
-        script.onerror = () => {
-          setMapError('카카오맵 스크립트 로드에 실패했습니다.')
-        }
-        document.head.appendChild(script)
       } else {
         setIsMapScriptLoaded(true)
       }
@@ -96,7 +111,7 @@ export default function StoresSection() {
   useEffect(() => {
     if (!showMap || !isMapScriptLoaded || !mapContainer.current) return
 
-    // 2초의 지연 시간을 두어 스크립트가 완전히 로드되도록 함 (배포 환경에서는 더 긴 지연이 필요할 수 있음)
+    // 3초의 지연 시간을 두어 스크립트가 완전히 로드되도록 함 (배포 환경에서는 더 긴 지연이 필요할 수 있음)
     const timer = setTimeout(() => {
       try {
         if (typeof window.kakao === 'undefined') {
@@ -105,9 +120,42 @@ export default function StoresSection() {
           return;
         }
 
-        // 카카오맵 SDK 초기화
-        window.kakao.maps.load(() => {
+        // 카카오맵 SDK 초기화 - autoload=false로 설정했으므로 수동으로 로드
+        if (!window.kakao.maps) {
+          console.log("카카오맵 maps 객체가 없습니다. 수동으로 로드합니다.");
+          // 로딩 오류 발생 시 최대 3번 재시도
+          let retryCount = 0;
+          const loadKakaoMaps = () => {
+            if (retryCount >= 3) {
+              setMapError('카카오맵을 로드하는데 실패했습니다. 잠시 후 다시 시도해주세요.');
+              return;
+            }
+            
+            try {
+              window.kakao.maps.load(() => {
+                initializeMap();
+              });
+            } catch (error) {
+              console.error("카카오맵 로드 에러:", error);
+              retryCount++;
+              setTimeout(loadKakaoMaps, 1000); // 1초 후 재시도
+            }
+          };
+          
+          loadKakaoMaps();
+        } else {
+          initializeMap();
+        }
+        
+        // 지도 초기화 함수
+        function initializeMap() {
           try {
+            if (!window.kakao.maps.services) {
+              console.error("카카오맵 services가 없습니다.");
+              setMapError('카카오맵 서비스를 불러오는데 실패했습니다.');
+              return;
+            }
+            
             // 지오코더 객체 생성
             const geocoder = new window.kakao.maps.services.Geocoder()
             
@@ -156,12 +204,12 @@ export default function StoresSection() {
             console.error("카카오맵 초기화 오류:", error)
             setMapError('지도 초기화 중 오류가 발생했습니다.')
           }
-        })
+        }
       } catch (error) {
         console.error("카카오맵 로드 에러:", error)
         setMapError('지도를 로드하는 과정에서 오류가 발생했습니다.')
       }
-    }, 2000)
+    }, 3000) // 3초로 지연 시간 증가
 
     return () => clearTimeout(timer)
   }, [isMapScriptLoaded, showMap])

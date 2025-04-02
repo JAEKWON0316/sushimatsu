@@ -47,10 +47,22 @@ const nextConfig = {
         headers: [
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.kakao.com *.daumcdn.net *.youtube.com; connect-src 'self' *.kakao.com *.daumcdn.net *.youtube.com; img-src 'self' data: blob: *.kakao.com *.daumcdn.net *.youtube.com img.youtube.com; style-src 'self' 'unsafe-inline' *.kakao.com *.daumcdn.net; frame-src 'self' *.kakao.com *.daumcdn.net www.youtube.com youtube.com;"
+            value: "default-src 'self' *.kakao.com *.daumcdn.net; script-src 'self' 'unsafe-inline' 'unsafe-eval' *.kakao.com *.daumcdn.net *.youtube.com; connect-src 'self' *.kakao.com *.daumcdn.net *.youtube.com https://dapi.kakao.com; img-src 'self' data: blob: *.kakao.com *.daumcdn.net *.youtube.com img.youtube.com; style-src 'self' 'unsafe-inline' *.kakao.com *.daumcdn.net; frame-src 'self' *.kakao.com *.daumcdn.net www.youtube.com youtube.com;"
           }
         ],
       },
+    ];
+  },
+  async rewrites() {
+    return [
+      {
+        source: "/dapi.kakao.com/:path*",
+        destination: "https://dapi.kakao.com/:path*"
+      },
+      {
+        source: "/v2/maps/sdk.js",
+        destination: "https://dapi.kakao.com/v2/maps/sdk.js"
+      }
     ];
   },
 }
