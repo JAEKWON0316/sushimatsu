@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
+import Script from "next/script"
 
 // 카카오맵 API 키와 매장 정보
 const KAKAO_API_KEY = process.env.NEXT_PUBLIC_KAKAO_API_KEY || "6256a21ea991a5f2d305bc6fc8655fa5"
@@ -61,8 +62,6 @@ export default function StoresSection() {
   const [isMapLoading, setIsMapLoading] = useState(false)
   const [isScriptLoaded, setIsScriptLoaded] = useState(false)
   const mapInstance = useRef<KakaoMap | null>(null)
-  const retryCount = useRef(0)
-  const MAX_RETRY = 15
 
   // 지도 표시/숨김 토글
   const toggleMap = () => {
@@ -71,7 +70,11 @@ export default function StoresSection() {
     // 지도를 보여줄 때 오류 메시지 초기화
     if (!showMap) {
       setMapError(null)
-      retryCount.current = 0
+      
+      // 지도가 이미 초기화되어 있지 않은 경우에만 로딩 상태로 설정
+      if (!mapInstance.current) {
+        setIsMapLoading(true)
+      }
     }
   }
 
@@ -79,17 +82,15 @@ export default function StoresSection() {
   const initializeMap = () => {
     if (!mapContainer.current) return
     
-    setIsMapLoading(true)
+    // 이미 지도 인스턴스가 존재하면 재사용
+    if (mapInstance.current) {
+      console.log("기존 지도 인스턴스 사용")
+      setIsMapLoading(false)
+      return
+    }
     
     try {
       console.log("지도 초기화 시작...")
-      
-      // 이미 지도 인스턴스가 존재하면 재사용
-      if (mapInstance.current) {
-        console.log("기존 지도 인스턴스 사용")
-        setIsMapLoading(false)
-        return
-      }
       
       // 지오코더 객체 생성
       if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
@@ -155,146 +156,87 @@ export default function StoresSection() {
     }
   }
 
-  // 카카오맵 API 스크립트 로드
-  useEffect(() => {
-    if (isScriptLoaded) return
+  // 카카오맵 스크립트 로드 완료 시 호출되는 함수
+  const onKakaoMapLoaded = () => {
+    console.log("카카오맵 스크립트 로드 완료")
+    setIsScriptLoaded(true)
     
-    // 미리 스크립트 로드 (페이지 로드 시)
-    if (!document.getElementById('kakao-map-script')) {
-      try {
-        console.log("카카오맵 스크립트 로드 시작...")
-        
-        // 스크립트 생성
-        const script = document.createElement('script')
-        script.id = 'kakao-map-script'
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services`
-        script.async = true
-        
-        // 로드 완료 이벤트
-        script.onload = () => {
-          console.log("카카오맵 스크립트 로드 완료")
-          setIsScriptLoaded(true)
-        }
-        
-        // 오류 처리
-        script.onerror = (error) => {
-          console.error("카카오맵 스크립트 로드 오류:", error)
-          setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
-        }
-        
-        // body에 스크립트 추가
-        document.body.appendChild(script)
-      } catch (error) {
-        console.error("스크립트 추가 중 오류 발생:", error)
-        setMapError('카카오맵 스크립트를 추가하는 과정에서 오류가 발생했습니다.')
-      }
-    } else {
-      // 이미 스크립트가 있으면 로드된 것으로 간주
-      setIsScriptLoaded(true)
+    // 지도가 표시되어 있는 상태라면 초기화 진행
+    if (showMap && mapContainer.current) {
+      initializeMap()
     }
-  }, [isScriptLoaded])
-  
+  }
+
   // 지도 컨테이너 표시 시 지도 초기화
   useEffect(() => {
-    // 지도가 표시되고 컨테이너가 존재할 때 초기화
-    if (showMap && mapContainer.current) {
-      // 카카오맵 로드 확인 함수
-      const checkKakaoMapLoaded = () => {
-        // 최대 재시도 횟수를 초과하면 오류 메시지 표시
-        if (retryCount.current >= MAX_RETRY) {
-          console.error("카카오맵 로드 재시도 횟수 초과")
-          setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
-          setIsMapLoading(false)
-          return
-        }
-        
-        if (window.kakao && window.kakao.maps && window.kakao.maps.services) {
-          console.log("카카오맵 객체 확인됨, 지도 초기화 시작")
-          initializeMap()
-        } else {
-          // 로드되지 않았으면 잠시 후 다시 시도
-          retryCount.current += 1
-          console.log(`카카오맵이 아직 로드되지 않음, 재시도... (${retryCount.current}/${MAX_RETRY})`)
-          setTimeout(checkKakaoMapLoaded, 300)
-        }
-      }
-      
-      if (isScriptLoaded) {
-        checkKakaoMapLoaded()
-      } else {
-        // 스크립트가 로드되면 지도 초기화
-        const scriptLoadCheck = setInterval(() => {
-          if (isScriptLoaded) {
-            clearInterval(scriptLoadCheck)
-            checkKakaoMapLoaded()
-          }
-          
-          // 일정 시간이 지나도 스크립트가 로드되지 않으면 오류 메시지 표시
-          retryCount.current += 1
-          if (retryCount.current >= MAX_RETRY) {
-            clearInterval(scriptLoadCheck)
-            console.error("카카오맵 스크립트 로드 시간 초과")
-            setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
-            setIsMapLoading(false)
-          }
-        }, 300)
-        
-        // 컴포넌트가 언마운트되면 인터벌 정리
-        return () => clearInterval(scriptLoadCheck)
-      }
+    if (showMap && isScriptLoaded && !mapInstance.current && mapContainer.current) {
+      initializeMap()
     }
   }, [showMap, isScriptLoaded])
 
   return (
-    <section id="stores" className="py-20 bg-black">
-      <div className="max-w-7xl mx-auto px-6">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">매장 안내</h2>
-        <div className="grid md:grid-cols-1 gap-12">
-          <div className="bg-gray-900 p-8 rounded-lg">
-            <h3 className="text-2xl font-bold mb-6">스시마츠 홍성점</h3>
-            <p className="mb-4">
-              <strong>주소:</strong> {STORE_ADDRESS}
-            </p>
-            <p className="mb-4">
-              <strong>전화:</strong> 0507-1380-5336
-            </p>
-            <p className="mb-4">
-              <strong>영업시간:</strong> 11:00 - 21:00
-            </p>
-            <div className="mt-6">
-              <Button 
-                className="bg-yellow-400 hover:bg-yellow-500 text-black mb-6"
-                onClick={toggleMap}
-              >
-                {showMap ? '지도 닫기' : '지도 보기'}
-              </Button>
-              
-              {/* 에러 메시지 표시 */}
-              {mapError && showMap && (
-                <div className="text-red-400 mb-4 p-2 bg-gray-800 rounded">
-                  {mapError}
-                </div>
-              )}
-              
-              {/* 지도 로딩 메시지 */}
-              {showMap && !mapError && isMapLoading && (
-                <div className="text-yellow-400 mb-4 p-2 bg-gray-800 rounded">
-                  지도를 불러오는 중입니다...
-                </div>
-              )}
-              
-              {/* 지도 컨테이너 */}
-              {showMap && (
-                <div 
-                  id="map" 
-                  ref={mapContainer} 
-                  className="w-full h-[400px] rounded-lg mt-4 overflow-hidden transition-all duration-300 bg-gray-800"
-                ></div>
-              )}
+    <>
+      {/* 카카오맵 스크립트 */}
+      <Script 
+        src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services`}
+        strategy="beforeInteractive"
+        onLoad={onKakaoMapLoaded}
+        onError={() => {
+          console.error("카카오맵 스크립트 로드 오류")
+          setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
+        }}
+      />
+      
+      <section id="stores" className="py-20 bg-black">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">매장 안내</h2>
+          <div className="grid md:grid-cols-1 gap-12">
+            <div className="bg-gray-900 p-8 rounded-lg">
+              <h3 className="text-2xl font-bold mb-6">스시마츠 홍성점</h3>
+              <p className="mb-4">
+                <strong>주소:</strong> {STORE_ADDRESS}
+              </p>
+              <p className="mb-4">
+                <strong>전화:</strong> 0507-1380-5336
+              </p>
+              <p className="mb-4">
+                <strong>영업시간:</strong> 11:00 - 21:00
+              </p>
+              <div className="mt-6">
+                <Button 
+                  className="bg-yellow-400 hover:bg-yellow-500 text-black mb-6"
+                  onClick={toggleMap}
+                >
+                  {showMap ? '지도 닫기' : '지도 보기'}
+                </Button>
+                
+                {/* 에러 메시지 표시 */}
+                {mapError && showMap && (
+                  <div className="text-red-400 mb-4 p-2 bg-gray-800 rounded">
+                    {mapError}
+                  </div>
+                )}
+                
+                {/* 지도 로딩 메시지 */}
+                {showMap && !mapError && isMapLoading && (
+                  <div className="text-yellow-400 mb-4 p-2 bg-gray-800 rounded">
+                    지도를 불러오는 중입니다...
+                  </div>
+                )}
+                
+                {/* 지도 컨테이너 */}
+                {showMap && (
+                  <div 
+                    id="map" 
+                    ref={mapContainer} 
+                    className="w-full h-[400px] rounded-lg mt-4 overflow-hidden transition-all duration-300 bg-gray-800"
+                  ></div>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   )
 } 
