@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { Button } from "@/components/ui/button"
-import Script from "next/script"
+import Head from "next/head"
 
 // 카카오맵 API 키와 매장 정보
 const KAKAO_API_KEY = process.env.NEXT_PUBLIC_KAKAO_API_KEY || "6256a21ea991a5f2d305bc6fc8655fa5"
@@ -60,27 +60,31 @@ export default function StoresSection() {
   const [showMap, setShowMap] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
   const [isMapLoading, setIsMapLoading] = useState(false)
-  const [isScriptLoaded, setIsScriptLoaded] = useState(false)
   const mapInstance = useRef<KakaoMap | null>(null)
+  const [isMapLoadAttempted, setIsMapLoadAttempted] = useState(false)
+
+  // 카카오맵 API 로드 상태 확인
+  const checkKakaoMapLoaded = (): boolean => {
+    return !!window.kakao && !!window.kakao.maps && !!window.kakao.maps.services;
+  }
 
   // 지도 표시/숨김 토글
   const toggleMap = () => {
     setShowMap((prev) => !prev)
     
-    // 지도를 보여줄 때 오류 메시지 초기화
+    // 지도를 보여줄 때 오류 메시지 초기화 및 로딩 설정
     if (!showMap) {
       setMapError(null)
-      
-      // 지도가 이미 초기화되어 있지 않은 경우에만 로딩 상태로 설정
       if (!mapInstance.current) {
         setIsMapLoading(true)
+        setIsMapLoadAttempted(true)
       }
     }
   }
 
   // 지도 초기화 함수
   const initializeMap = () => {
-    if (!mapContainer.current) return
+    if (!mapContainer.current) return;
     
     // 이미 지도 인스턴스가 존재하면 재사용
     if (mapInstance.current) {
@@ -93,7 +97,7 @@ export default function StoresSection() {
       console.log("지도 초기화 시작...")
       
       // 지오코더 객체 생성
-      if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+      if (!checkKakaoMapLoaded()) {
         console.error("카카오맵 서비스가 로드되지 않았습니다.")
         setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
         setIsMapLoading(false)
@@ -156,36 +160,48 @@ export default function StoresSection() {
     }
   }
 
-  // 카카오맵 스크립트 로드 완료 시 호출되는 함수
-  const onKakaoMapLoaded = () => {
-    console.log("카카오맵 스크립트 로드 완료")
-    setIsScriptLoaded(true)
-    
-    // 지도가 표시되어 있는 상태라면 초기화 진행
-    if (showMap && mapContainer.current) {
-      initializeMap()
-    }
-  }
-
-  // 지도 컨테이너 표시 시 지도 초기화
+  // 지도 초기화 시도
   useEffect(() => {
-    if (showMap && isScriptLoaded && !mapInstance.current && mapContainer.current) {
-      initializeMap()
+    if (showMap && isMapLoadAttempted && !mapInstance.current) {
+      if (checkKakaoMapLoaded()) {
+        console.log("카카오맵 SDK 로드 확인됨, 지도 초기화 시작")
+        initializeMap()
+      } else {
+        console.log("카카오맵 SDK가 로드되지 않음, 로드 후 초기화 예정")
+        // 카카오맵 로드 확인을 위한 인터벌 설정
+        const checkInterval = setInterval(() => {
+          if (checkKakaoMapLoaded()) {
+            clearInterval(checkInterval)
+            console.log("카카오맵 SDK 로드 확인됨, 지도 초기화 시작")
+            initializeMap()
+          }
+        }, 300)
+        
+        // 일정 시간 후 로드 실패로 처리
+        setTimeout(() => {
+          clearInterval(checkInterval)
+          if (!checkKakaoMapLoaded()) {
+            console.error("카카오맵 SDK 로드 시간 초과")
+            setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
+            setIsMapLoading(false)
+          }
+        }, 10000) // 10초 후에 타임아웃
+        
+        return () => {
+          clearInterval(checkInterval)
+        }
+      }
     }
-  }, [showMap, isScriptLoaded])
+  }, [showMap, isMapLoadAttempted])
 
   return (
     <>
-      {/* 카카오맵 스크립트 */}
-      <Script 
-        src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services`}
-        strategy="beforeInteractive"
-        onLoad={onKakaoMapLoaded}
-        onError={() => {
-          console.error("카카오맵 스크립트 로드 오류")
-          setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
-        }}
-      />
+      <Head>
+        <script 
+          type="text/javascript" 
+          src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services`}
+        ></script>
+      </Head>
       
       <section id="stores" className="py-20 bg-black">
         <div className="max-w-7xl mx-auto px-6">
