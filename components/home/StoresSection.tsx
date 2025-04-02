@@ -79,8 +79,7 @@ export default function StoresSection() {
         try {
           const script = document.createElement('script')
           script.id = 'kakao-map-script'
-          // Vercel 프록시를 통해 요청하기 위해 상대 경로 사용
-          script.src = `/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false`
+          script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false`
           script.crossOrigin = "anonymous"
           script.async = true
           script.defer = true
