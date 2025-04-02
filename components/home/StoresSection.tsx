@@ -1,10 +1,9 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 
 // 매장 정보
 const STORE_ADDRESS = "충남 홍성군 홍북읍 청사로174번길 25 2층"
-const STORE_NAME = "스시마츠 홍성점"
 
 export default function StoresSection() {
   const [isLoading, setIsLoading] = useState(true)
