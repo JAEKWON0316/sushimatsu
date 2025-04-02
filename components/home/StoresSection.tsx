@@ -7,6 +7,43 @@ const STORE_ADDRESS = "충남 홍성군 홍북읍 청사로174번길 25 2층"
 const STORE_NAME = "스시마츠 홍성점"
 const STORE_LOCATION = { lat: 36.6212, lng: 126.6657 } // 홍성군 홍북읍의 대략적인 좌표 (미리 설정)
 
+// 카카오맵 타입 정의
+declare global {
+  interface Window {
+    kakao: {
+      maps: {
+        load: (callback: () => void) => void;
+        LatLng: new (lat: number, lng: number) => KakaoLatLng;
+        Map: new (container: HTMLElement, options: { center: KakaoLatLng; level: number }) => KakaoMap;
+        Marker: new (options: { position: KakaoLatLng }) => KakaoMarker;
+        InfoWindow: new (options: { content: string }) => KakaoInfoWindow;
+      };
+    };
+  }
+}
+
+// 카카오맵 관련 인터페이스 정의
+interface KakaoLatLng {
+  getLat(): number;
+  getLng(): number;
+}
+
+interface KakaoMap {
+  setCenter(position: KakaoLatLng): void;
+  getLevel(): number;
+  setLevel(level: number): void;
+}
+
+interface KakaoMarker {
+  setMap(map: KakaoMap | null): void;
+  getPosition(): KakaoLatLng;
+}
+
+interface KakaoInfoWindow {
+  open(map: KakaoMap, marker: KakaoMarker): void;
+  close(): void;
+}
+
 export default function StoresSection() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const [isMapLoaded, setIsMapLoaded] = useState(false)
@@ -53,7 +90,7 @@ export default function StoresSection() {
         document.head.removeChild(script)
       }
     }
-  }, [])
+  }, [isMapLoaded])
   
   // 지도 초기화 함수
   const initializeMap = () => {
@@ -118,19 +155,4 @@ export default function StoresSection() {
       </div>
     </section>
   )
-}
-
-// 카카오맵 타입 정의
-declare global {
-  interface Window {
-    kakao: {
-      maps: {
-        load: (callback: () => void) => void;
-        LatLng: new (lat: number, lng: number) => any;
-        Map: new (container: HTMLElement, options: { center: any; level: number }) => any;
-        Marker: new (options: { position: any }) => any;
-        InfoWindow: new (options: { content: string }) => any;
-      };
-    };
-  }
 } 
