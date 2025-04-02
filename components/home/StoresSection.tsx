@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import { Button } from "@/components/ui/button"
-import Head from "next/head"
+import Script from "next/script"
 
 // 카카오맵 API 키와 매장 정보
 const KAKAO_API_KEY = process.env.NEXT_PUBLIC_KAKAO_API_KEY || "6256a21ea991a5f2d305bc6fc8655fa5"
@@ -61,7 +61,7 @@ export default function StoresSection() {
   const [mapError, setMapError] = useState<string | null>(null)
   const [isMapLoading, setIsMapLoading] = useState(false)
   const mapInstance = useRef<KakaoMap | null>(null)
-  const [isMapLoadAttempted, setIsMapLoadAttempted] = useState(false)
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false)
 
   // 카카오맵 API 로드 상태 확인
   const checkKakaoMapLoaded = (): boolean => {
@@ -77,13 +77,12 @@ export default function StoresSection() {
       setMapError(null)
       if (!mapInstance.current) {
         setIsMapLoading(true)
-        setIsMapLoadAttempted(true)
       }
     }
   }
 
-  // 지도 초기화 함수
-  const initializeMap = () => {
+  // 지도 초기화 함수 (useCallback으로 감싸서 의존성 배열 문제 해결)
+  const initializeMap = useCallback(() => {
     if (!mapContainer.current) return;
     
     // 이미 지도 인스턴스가 존재하면 재사용
@@ -158,11 +157,22 @@ export default function StoresSection() {
       setMapError('지도 초기화 중 오류가 발생했습니다.')
       setIsMapLoading(false)
     }
+  }, [])
+
+  // 카카오맵 스크립트 로드 완료 이벤트 핸들러
+  const handleScriptLoad = () => {
+    console.log("카카오맵 SDK 로드 완료")
+    setIsScriptLoaded(true)
+    
+    // 지도가 표시되어 있다면 초기화 시작
+    if (showMap && !mapInstance.current) {
+      initializeMap()
+    }
   }
 
   // 지도 초기화 시도
   useEffect(() => {
-    if (showMap && isMapLoadAttempted && !mapInstance.current) {
+    if (showMap && isScriptLoaded && !mapInstance.current) {
       if (checkKakaoMapLoaded()) {
         console.log("카카오맵 SDK 로드 확인됨, 지도 초기화 시작")
         initializeMap()
@@ -178,7 +188,7 @@ export default function StoresSection() {
         }, 300)
         
         // 일정 시간 후 로드 실패로 처리
-        setTimeout(() => {
+        const timeoutId = setTimeout(() => {
           clearInterval(checkInterval)
           if (!checkKakaoMapLoaded()) {
             console.error("카카오맵 SDK 로드 시간 초과")
@@ -189,19 +199,24 @@ export default function StoresSection() {
         
         return () => {
           clearInterval(checkInterval)
+          clearTimeout(timeoutId)
         }
       }
     }
-  }, [showMap, isMapLoadAttempted])
+  }, [showMap, isScriptLoaded, initializeMap])
 
   return (
     <>
-      <Head>
-        <script 
-          type="text/javascript" 
-          src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services`}
-        ></script>
-      </Head>
+      {/* 카카오맵 스크립트 - Next.js에서 권장하는 방식으로 스크립트 로드 */}
+      <Script 
+        src={`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services`}
+        strategy="afterInteractive"
+        onLoad={handleScriptLoad}
+        onError={() => {
+          console.error("카카오맵 스크립트 로드 오류")
+          setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.')
+        }}
+      />
       
       <section id="stores" className="py-20 bg-black">
         <div className="max-w-7xl mx-auto px-6">
