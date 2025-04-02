@@ -60,61 +60,12 @@ export default function StoresSection() {
   const [showMap, setShowMap] = useState(false)
   const [mapError, setMapError] = useState<string | null>(null)
   const [isMapScriptLoaded, setIsMapScriptLoaded] = useState(false)
+  const [isMapInitialized, setIsMapInitialized] = useState(false)
+  const isLoadingScript = useRef(false)
 
-  // 지도 표시/숨김 토글
-  const toggleMap = () => {
-    setShowMap((prev) => !prev)
-    if (!showMap) {
-      setMapError(null)
-    }
-  }
-
-  // 카카오맵 API 스크립트 로드
-  useEffect(() => {
-    if (!showMap) return
-    
-    if (!isMapScriptLoaded) {
-      try {
-        // 카카오맵이 이미 로드되어 있는지 확인
-        if (window.kakao && window.kakao.maps) {
-          console.log("카카오맵 이미 로드됨");
-          setIsMapScriptLoaded(true);
-          return;
-        }
-        
-        console.log("카카오맵 스크립트 로드 시작...");
-        
-        // 카카오맵 콜백 함수 정의
-        window.kakaoMapCallback = () => {
-          console.log("카카오맵 콜백 함수 실행");
-          setIsMapScriptLoaded(true);
-        };
-        
-        // 스크립트 생성
-        const script = document.createElement('script');
-        script.id = 'kakao-map-script';
-        // 카카오 공식 방식으로 콜백 함수 사용
-        script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false&callback=kakaoMapCallback`;
-        script.async = true;
-        
-        // 오류 처리
-        script.onerror = (error) => {
-          console.error("카카오맵 스크립트 로드 오류:", error);
-          setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.');
-        };
-        
-        // body에 스크립트 추가
-        document.body.appendChild(script);
-      } catch (error) {
-        console.error("스크립트 추가 중 오류 발생:", error);
-        setMapError('카카오맵 스크립트를 추가하는 과정에서 오류가 발생했습니다.');
-      }
-    }
-  }, [showMap, isMapScriptLoaded]);
-  
-  // 카카오맵 SDK 로드 후 지도 초기화
-  useEffect(() => {
-    if (!showMap || !isMapScriptLoaded || !mapContainer.current) return;
+  // 지도 초기화 함수
+  const initializeMap = () => {
+    if (!mapContainer.current || !window.kakao || !window.kakao.maps) return
     
     console.log("지도 초기화 시작...");
     
@@ -172,6 +123,7 @@ export default function StoresSection() {
                 });
                 
                 console.log("지도 초기화 완료");
+                setIsMapInitialized(true);
               }
             } else {
               console.error("주소 검색 실패:", status);
@@ -187,7 +139,74 @@ export default function StoresSection() {
       console.error("카카오맵 로드 오류:", error);
       setMapError('지도를 로드하는데 실패했습니다.');
     }
-  }, [isMapScriptLoaded, showMap, STORE_ADDRESS, STORE_NAME]);
+  }
+
+  // 지도 표시/숨김 토글
+  const toggleMap = () => {
+    if (!showMap && !isMapScriptLoaded && !isLoadingScript.current) {
+      // 스크립트가 로드되지 않았고, 현재 로드 중이 아니라면 로드 시작
+      loadKakaoMapScript();
+    }
+    setShowMap((prev) => !prev);
+    if (!showMap) {
+      setMapError(null);
+    }
+  }
+
+  // 카카오맵 API 스크립트 로드
+  const loadKakaoMapScript = () => {
+    if (isMapScriptLoaded || isLoadingScript.current) return;
+    
+    isLoadingScript.current = true;
+    try {
+      // 카카오맵이 이미 로드되어 있는지 확인
+      if (window.kakao && window.kakao.maps) {
+        console.log("카카오맵 이미 로드됨");
+        setIsMapScriptLoaded(true);
+        initializeMap();
+        isLoadingScript.current = false;
+        return;
+      }
+      
+      console.log("카카오맵 스크립트 로드 시작...");
+      
+      // 카카오맵 콜백 함수 정의
+      window.kakaoMapCallback = () => {
+        console.log("카카오맵 콜백 함수 실행");
+        setIsMapScriptLoaded(true);
+        initializeMap();
+        isLoadingScript.current = false;
+      };
+      
+      // 스크립트 생성
+      const script = document.createElement('script');
+      script.id = 'kakao-map-script';
+      // 카카오 공식 방식으로 콜백 함수 사용
+      script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${KAKAO_API_KEY}&libraries=services&autoload=false&callback=kakaoMapCallback`;
+      script.async = true;
+      
+      // 오류 처리
+      script.onerror = (error) => {
+        console.error("카카오맵 스크립트 로드 오류:", error);
+        setMapError('카카오맵을 불러오는데 실패했습니다. 새로고침 후 다시 시도해주세요.');
+        isLoadingScript.current = false;
+      };
+      
+      // body에 스크립트 추가
+      document.body.appendChild(script);
+    } catch (error) {
+      console.error("스크립트 추가 중 오류 발생:", error);
+      setMapError('카카오맵 스크립트를 추가하는 과정에서 오류가 발생했습니다.');
+      isLoadingScript.current = false;
+    }
+  }
+  
+  // 맵 컨테이너가 마운트되고 스크립트가 로드된 후 지도 초기화
+  useEffect(() => {
+    if (showMap && isMapScriptLoaded && !isMapInitialized && mapContainer.current) {
+      initializeMap();
+    }
+  }, [showMap, isMapScriptLoaded, isMapInitialized]);
 
   return (
     <section id="stores" className="py-20 bg-black">
@@ -221,7 +240,7 @@ export default function StoresSection() {
               )}
               
               {/* 지도 로딩 메시지 */}
-              {showMap && !mapError && !isMapScriptLoaded && (
+              {showMap && !mapError && (!isMapScriptLoaded || !isMapInitialized) && (
                 <div className="text-yellow-400 mb-4 p-2 bg-gray-800 rounded">
                   지도를 불러오는 중입니다...
                 </div>
