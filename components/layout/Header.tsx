@@ -69,10 +69,10 @@ export default function Header() {
           <div className="text-yellow-400 font-bold text-lg whitespace-nowrap">가맹문의 0507-1380-5336</div>
         </div>
 
-        {/* 모바일 메뉴 버튼 */}
+        {/* 모바일 메뉴 버튼 - 노란색으로 변경 */}
         <div className="lg:hidden">
           <button 
-            className="text-white"
+            className="text-yellow-400"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
           >
             <svg
@@ -122,7 +122,6 @@ export default function Header() {
             >
               가맹문의
             </button>
-            <div className="mt-4 text-yellow-400 font-bold">가맹문의 0507-1380-5336</div>
           </div>
         </div>
       )}
