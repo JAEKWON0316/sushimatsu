@@ -11,6 +11,7 @@ import AboutSection from "@/components/home/AboutSection"
 import MenuSection from "@/components/home/MenuSection"
 import StoresSection from "@/components/home/StoresSection"
 import FranchiseSection from "@/components/home/FranchiseSection"
+import FranchisePromotionSection from "@/components/home/FranchisePromotionSection"
 import FaqSection from "@/components/home/FaqSection"
 import FeatureSection from "@/components/home/FeatureSection"
 import StatsSection from "@/components/home/StatsSection"
@@ -40,6 +41,7 @@ export default function Home() {
         <VideoSection />
         <StoresSection />
         <FaqSection />
+        <FranchisePromotionSection />
         <FranchiseSection />
       </main>
       

@@ -9,13 +9,13 @@ export default function AboutSection() {
       <div className="max-w-7xl mx-auto px-6">
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">브랜드 소개</h2>
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
+          <div className="flex justify-center items-center">
             <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/%EC%A0%9C%EB%AA%A9%20%EC%97%86%EB%8A%94%20%EB%94%94%EC%9E%90%EC%9D%B8%20-%202025-03-06T184344.780-DcgG72xXgchUmsW6WpewJxAP80MDiR.png"
+              src="/logo004.png"
               alt="스시마츠 로고"
-              width={600}
+              width={400}
               height={400}
-              className="rounded-lg shadow-lg"
+              className="rounded-lg h-auto w-auto max-w-full"
             />
           </div>
           <div>
