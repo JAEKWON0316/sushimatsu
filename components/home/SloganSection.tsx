@@ -3,10 +3,7 @@
 import { Button } from "@/components/ui/button"
 
 export default function SloganSection() {
-  const scrollToStrengths = () => {
-    const element = document.getElementById('strengths')
-    if (element) element.scrollIntoView({ behavior: 'smooth' })
-  }
+
 
   return (
     <section className="py-24 bg-black text-white">

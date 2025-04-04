@@ -9,13 +9,7 @@ export const metadata: Metadata = {
   title: "스시마츠 - 프리미엄 스시 브랜드",
   description: "신선함이 살아있는 프리미엄 스시 브랜드 스시마츠입니다. 최고의 재료로 만든 스시를 만나보세요.",
   icons: {
-    icon: [
-      { url: '/favicon.ico', sizes: '32x32' },
-      { url: '/favicon-16x16.png', sizes: '16x16' },
-      { url: '/favicon-32x32.png', sizes: '32x32' }
-    ],
-    apple: '/apple-touch-icon.png',
-    shortcut: '/favicon.ico'
+    icon: '/favicon.ico',
   },
   openGraph: {
     title: "스시마츠 - 프리미엄 스시 브랜드",
@@ -48,13 +42,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/favicon-16x16.png" type="image/png" sizes="16x16" />
-        <link rel="icon" href="/favicon-32x32.png" type="image/png" sizes="32x32" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-        <link rel="manifest" href="/site.webmanifest" />
-      </head>
       <body className={inter.className}>{children}</body>
     </html>
   )

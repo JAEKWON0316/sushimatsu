@@ -8,7 +8,7 @@ export default function FranchiseSection() {
   // 가맹 문의 정보
   const contactInfo = {
     phone: "0507-1380-5336",
-    email: "support@sushimatsu.com"
+    email: "@ansy3131@naver.com"
   }
 
   // 창업 성공 요소
@@ -57,7 +57,7 @@ export default function FranchiseSection() {
               
               <div className="flex space-x-4">
                 <Button className="bg-yellow-400 hover:bg-yellow-500 text-black flex-1">
-                  <Phone className="mr-2 h-4 w-4" /> 즉시 상담 신청
+                  <Phone className="mr-2 h-4 w-4" /> {contactInfo.phone}
                 </Button>
                 <Button variant="outline" className="border-white text-white hover:bg-gray-700 flex-1">
                   <Calendar className="mr-2 h-4 w-4" /> 방문 상담 예약

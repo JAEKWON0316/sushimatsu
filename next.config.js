@@ -52,6 +52,15 @@ const nextConfig = {
         ],
       },
       {
+        source: '/favicon.ico',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800'
+          }
+        ],
+      },
+      {
         source: '/v2/maps/sdk.js',
         headers: [
           {
