@@ -9,7 +9,15 @@ export const metadata: Metadata = {
   title: "스시마츠 - 프리미엄 스시 브랜드",
   description: "신선함이 살아있는 프리미엄 스시 브랜드 스시마츠입니다. 최고의 재료로 만든 스시를 만나보세요.",
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon-96x96.png', sizes: '96x96', type: 'image/png' }
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }
+    ]
   },
   openGraph: {
     title: "스시마츠 - 프리미엄 스시 브랜드",

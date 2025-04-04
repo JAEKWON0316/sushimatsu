@@ -57,6 +57,36 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=604800'
+          },
+          {
+            key: 'Content-Type',
+            value: 'image/x-icon'
+          }
+        ],
+      },
+      {
+        source: '/favicon-:size.png',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800'
+          },
+          {
+            key: 'Content-Type',
+            value: 'image/png'
+          }
+        ],
+      },
+      {
+        source: '/apple-touch-icon.png',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800'
+          },
+          {
+            key: 'Content-Type',
+            value: 'image/png'
           }
         ],
       },
