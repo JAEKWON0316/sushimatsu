@@ -9,39 +9,20 @@ export default function SloganSection() {
   }
 
   return (
-    <section className="bg-black text-white py-32 border-t border-gray-800">
-      <div className="max-w-7xl mx-auto px-6 text-center">
-        <div className="space-y-10">
-          <div>
-            <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
-              무조건 성공할 거라는<br />
-              생각은 버리세요
-            </h2>
-            <div className="h-2 w-32 bg-yellow-400 mx-auto mt-10"></div>
-          </div>
-
-          <div>
-            <h3 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-              그러나<br />
-              <span className="text-yellow-400">스시마츠</span>는 <span className="text-yellow-400">다릅니다</span>
-            </h3>
-          </div>
-          
-          <div className="pt-10">
-            <Button 
-              onClick={scrollToStrengths}
-              className="bg-yellow-400 hover:bg-yellow-500 text-black text-lg py-6 px-8"
-            >
-              자신감 넘치는 창업 스토리 보러가기
-            </Button>
-          </div>
-          
-          <div className="pt-16">
-            <p className="text-3xl md:text-4xl font-semibold text-gray-300">
-              치열한 경쟁 속에<br />
-              <span className="text-white">스시마츠는 10년 동안 검증했습니다</span>
-            </p>
-          </div>
+    <section className="py-24 bg-black text-white">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center">
+          <h2 className="text-5xl md:text-7xl font-bold mb-8 text-yellow-400">스시마츠 待 (기다리다)</h2>
+          <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-6">
+            어렵고 힘든 브랜드입니다.<br/>
+            대신 쉽게 흔들리지 않으며 계속 앞으로 나아갑니다.
+          </p>
+          <p className="text-2xl md:text-3xl font-bold max-w-3xl mx-auto text-yellow-400 leading-relaxed">
+            그럼에도 도전해보신다면,<br/> 
+            <span className="text-3xl md:text-4xl relative inline-block mt-2 py-2 px-4 after:content-[''] after:absolute after:w-full after:h-1 after:bg-yellow-400 after:bottom-0 after:left-0">
+              3분만 시간을 내어주십시오.
+            </span>
+          </p>
         </div>
       </div>
     </section>

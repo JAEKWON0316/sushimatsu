@@ -7,31 +7,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { ArrowUpRight } from "lucide-react"
 
 const stats = [
   {
     id: 1,
     value: "10+",
     title: "운영 경력",
-    description: "10년 이상의 운영 노하우",
+    description: "10년 이상의 경험과 노하우",
   },
   {
     id: 2,
-    value: "30+",
-    title: "가맹점",
-    description: "전국 30개 이상의 매장",
+    value: "0",
+    title: "가맹비",
+    description: "순수 공사비 외 금액 없음",
   },
   {
     id: 3,
-    value: "0%",
-    title: "폐업률",
-    description: "2년 연속 폐업률 0%",
+    value: "30%",
+    title: "순이익률",
+    description: "안정적인 수익 구조",
   },
   {
     id: 4,
-    value: "80%",
-    title: "재방문율",
-    description: "평균 80% 이상의 재방문율",
+    value: "8,000+",
+    title: "최고매출",
+    description: "월 최고 매출 달성 가맹점",
   },
 ]
 
@@ -42,7 +44,7 @@ export default function StatsSection() {
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">스시마츠의 숫자로 보는 성공</h2>
           <p className="text-lg text-gray-300 max-w-3xl mx-auto">
-            철저한 운영 시스템과 지속적인 품질 관리로 얻은 스시마츠의 성과
+            어렵고 힘들지만 쉽게 흔들리지 않는 스시마츠의 성과
           </p>
         </div>
 
@@ -60,38 +62,21 @@ export default function StatsSection() {
           ))}
         </div>
 
-        <Card className="mt-16 bg-gray-900 border-gray-800 text-white">
+        <Card className="mt-16 mb-8 bg-gray-900 border-gray-800 text-white">
           <CardContent className="p-8">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <div>
-                <h3 className="text-2xl font-bold mb-4">매년 성장하는 스시마츠</h3>
-                <p className="text-gray-300 mb-4">
-                  스시마츠는 코로나 시기에도 꾸준히 성장하여 매년 매출과 가맹점 수가 증가하고 있습니다. 
-                  높은 고객 만족도와 합리적인 운영 시스템으로 안정적인 수익을 보장합니다.
-                </p>
-                <p className="text-gray-300">
-                  가맹점당 평균 월 매출 3,000만원 이상을 기록하며, 일부 매장은 5,000만원 이상의 
-                  월 매출을 달성하고 있습니다.
-                </p>
-              </div>
-              <div className="relative h-64 bg-gray-800 rounded-lg overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-full px-8">
-                    <div className="w-full bg-gray-700 h-6 mb-6 rounded-full overflow-hidden">
-                      <div className="bg-yellow-400 h-full rounded-full" style={{ width: "85%" }}></div>
-                    </div>
-                    <div className="w-full bg-gray-700 h-6 mb-6 rounded-full overflow-hidden">
-                      <div className="bg-yellow-400 h-full rounded-full" style={{ width: "92%" }}></div>
-                    </div>
-                    <div className="w-full bg-gray-700 h-6 mb-6 rounded-full overflow-hidden">
-                      <div className="bg-yellow-400 h-full rounded-full" style={{ width: "78%" }}></div>
-                    </div>
-                    <div className="w-full bg-gray-700 h-6 rounded-full overflow-hidden">
-                      <div className="bg-yellow-400 h-full rounded-full" style={{ width: "96%" }}></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <div className="text-center">
+              <h3 className="text-2xl font-bold mb-4 text-yellow-400">스시마츠의 성공 비결</h3>
+              <p className="text-gray-300 mb-6 max-w-2xl mx-auto">
+                스시마츠는 단순한 초밥집이 아닌 <span className="text-yellow-400 font-bold">미들급 일식집</span>으로서
+                차별화된 시스템과 가맹점과의 <span className="text-yellow-400 font-bold">부모와 자식</span> 같은 
+                관계를 통해 지속 가능한 성장을 이루고 있습니다.
+              </p>
+              <Button 
+                className="bg-yellow-400 hover:bg-yellow-500 text-black"
+                onClick={() => document.getElementById('profit-analysis')?.scrollIntoView({ behavior: 'smooth' })}
+              >
+                수익 분석 자세히 보기 <ArrowUpRight className="ml-2 h-5 w-5" />
+              </Button>
             </div>
           </CardContent>
         </Card>
